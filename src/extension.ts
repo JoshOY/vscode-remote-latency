@@ -6,6 +6,8 @@ const STATUS_BAR_PRIORITY = 9999;
 
 const UPDATE_INTERVAL_MS = 3000;
 
+const BATCHING_LOOP = 10;
+
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
@@ -38,11 +40,12 @@ export function activate(context: vscode.ExtensionContext) {
 async function getLatency(remoteEnvName: string): Promise<number> {
   switch (remoteEnvName) {
     case 'ssh-remote':
+    case 'wsl':
     case 'wsl-remote':
     case 'containers-remote':
       return await getRemoteContainerLatency();
     default:
-      return await getRemoteLatency();
+      return await getRemoteLatencyWithDefaultFS();
   }
 }
 
@@ -50,26 +53,30 @@ async function getRemoteContainerLatency(): Promise<number> {
   if (vscode.workspace.workspaceFolders?.length) {
     const workspaceFolderUri = vscode.workspace.workspaceFolders[0].uri;
     const startTime = performance.now();
-    try {
-      await vscode.workspace.fs.stat(workspaceFolderUri);
-    } catch (e) {
-      // Ignore
+    for (let i = 0; i < BATCHING_LOOP; i++) {
+      try {
+        await vscode.workspace.fs.stat(workspaceFolderUri);
+      } catch (e) {
+        // Ignore
+      }
     }
     const endTime = performance.now();
-    return endTime - startTime;
+    return (endTime - startTime) / BATCHING_LOOP;
   }
   return 0;
 }
 
-async function getRemoteLatency(): Promise<number> {
+async function getRemoteLatencyWithDefaultFS(): Promise<number> {
   const startTime = performance.now();
-  try {
-    await vscode.workspace.fs.stat(vscode.Uri.parse('/dev/null'));
-  } catch (e) {
-    // Ignore
+  for (let i = 0; i < BATCHING_LOOP; i++) {
+    try {
+      await vscode.workspace.fs.stat(vscode.Uri.parse('/dev/null'));
+    } catch (e) {
+      // Ignore
+    }
   }
   const endTime = performance.now();
-  return endTime - startTime;
+  return (endTime - startTime) / BATCHING_LOOP;
 }
 
 // This method is called when your extension is deactivated

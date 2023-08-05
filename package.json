@@ -3,7 +3,7 @@
   "displayName": "remote-latency",
   "description": "Measure network latency when connecting remote workspace",
   "author": "Josh Ouyang <me@joshoy.org>",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "repository": "https://github.com/JoshOY/vscode-remote-latency",
   "engines": {
     "vscode": "^1.74.0"
