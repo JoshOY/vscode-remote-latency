@@ -2,10 +2,38 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 
+const STATUS_BAR_PRIORITY = 9999;
+
+const UPDATE_INTERVAL_MS = 3000;
+
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
+export function activate(context: vscode.ExtensionContext) {
+  const outputChannel = vscode.window.createOutputChannel('remote-latency');
 
-const STATUS_BAR_PRIORITY = 9999;
+  const remoteEnvName = vscode.env.remoteName;
+  outputChannel.appendLine(`Remote env name: ${remoteEnvName}`);
+
+  if (!remoteEnvName) {
+    // Not in remote
+    return;
+  }
+
+  const statusBarItem: vscode.StatusBarItem = vscode.window.createStatusBarItem(
+    vscode.StatusBarAlignment.Left,
+    STATUS_BAR_PRIORITY
+  );
+  statusBarItem.text = 'Latency: 0ms';
+  statusBarItem.show();
+
+  const updateStatusBarItem = async () => {
+    const latency = await getLatency(remoteEnvName);
+    statusBarItem.text = `Latency: ${latency.toFixed(2)}ms`;
+    setTimeout(updateStatusBarItem, UPDATE_INTERVAL_MS);
+  }
+
+  updateStatusBarItem();
+}
 
 async function getLatency(remoteEnvName: string): Promise<number> {
   switch (remoteEnvName) {
@@ -42,30 +70,6 @@ async function getRemoteLatency(): Promise<number> {
   }
   const endTime = performance.now();
   return endTime - startTime;
-}
-
-
-export function activate(context: vscode.ExtensionContext) {
-  const remoteEnvName = vscode.env.remoteName;
-  if (!remoteEnvName) {
-    // Not in remote
-    return;
-  }
-
-  const statusBarItem: vscode.StatusBarItem = vscode.window.createStatusBarItem(
-    vscode.StatusBarAlignment.Left,
-    STATUS_BAR_PRIORITY
-  );
-  statusBarItem.text = 'Latency: 0ms';
-  statusBarItem.show();
-
-  const updateStatusBarItem = async () => {
-    const latency = await getLatency(remoteEnvName);
-    statusBarItem.text = `Latency: ${latency.toFixed(2)}ms`;
-    setTimeout(updateStatusBarItem, 3000);
-  }
-
-  updateStatusBarItem();
 }
 
 // This method is called when your extension is deactivated
