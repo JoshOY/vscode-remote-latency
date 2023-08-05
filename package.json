@@ -8,6 +8,7 @@
   "engines": {
     "vscode": "^1.74.0"
   },
+  "publisher": "joshoy",
   "categories": [
     "Other"
   ],

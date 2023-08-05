@@ -12,6 +12,6 @@ VSCode version >= 1.74.0
 
 ## Release Notes
 
-### 0.0.1
+### 0.1.0
 
 Initialize and publish this extension. 
