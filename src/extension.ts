@@ -2,8 +2,6 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 
-const STATUS_BAR_PRIORITY = 9999;
-
 const UPDATE_INTERVAL_MS = 3000;
 
 const BATCHING_LOOP = 10;
@@ -22,8 +20,7 @@ export function activate(context: vscode.ExtensionContext) {
   }
 
   const statusBarItem: vscode.StatusBarItem = vscode.window.createStatusBarItem(
-    vscode.StatusBarAlignment.Left,
-    STATUS_BAR_PRIORITY
+    vscode.StatusBarAlignment.Left
   );
   statusBarItem.text = 'Latency: 0ms';
   statusBarItem.show();
@@ -32,7 +29,7 @@ export function activate(context: vscode.ExtensionContext) {
     const latency = await getLatency(remoteEnvName);
     statusBarItem.text = `Latency: ${latency.toFixed(2)}ms`;
     setTimeout(updateStatusBarItem, UPDATE_INTERVAL_MS);
-  }
+  };
 
   updateStatusBarItem();
 }
