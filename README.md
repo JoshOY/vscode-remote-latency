@@ -1,4 +1,4 @@
-# remote-latency
+# VSCode Remote Latency Extension
 
 Measure network latency when connecting remote workspace.
 
@@ -11,6 +11,10 @@ Provide a latency measure on status bar. NOTE: It only displays in remote mode.
 VSCode version >= 1.74.0
 
 ## Release Notes
+
+### 0.2.0
+
+Allow setting alignment direction (left/right) on the status bar.
 
 ### 0.1.0
 

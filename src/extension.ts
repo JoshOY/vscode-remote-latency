@@ -6,6 +6,8 @@ const UPDATE_INTERVAL_MS = 3000;
 
 const BATCHING_LOOP = 10;
 
+const CONFIGURAION_KEY_ALIGNMENT = 'remote-latency.alignRight';
+
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
@@ -19,10 +21,19 @@ export function activate(context: vscode.ExtensionContext) {
     return;
   }
 
-  const statusBarItem: vscode.StatusBarItem = vscode.window.createStatusBarItem(
-    vscode.StatusBarAlignment.Left
-  );
-  statusBarItem.text = 'Latency: 0ms';
+  let statusBarItem: vscode.StatusBarItem = vscode.window.createStatusBarItem(getAlignmentFromConfiguration());
+
+  vscode.workspace.onDidChangeConfiguration(event => {
+    if (event.affectsConfiguration(CONFIGURAION_KEY_ALIGNMENT)) {
+      const previousText = statusBarItem.text;
+      statusBarItem.dispose();
+      statusBarItem = vscode.window.createStatusBarItem(getAlignmentFromConfiguration());
+      statusBarItem.text = previousText;
+      statusBarItem.show();
+    }
+  });
+
+  statusBarItem.text = 'Latency: -';
   statusBarItem.show();
 
   const updateStatusBarItem = async () => {
@@ -74,6 +85,14 @@ async function getRemoteLatencyWithDefaultFS(): Promise<number> {
   }
   const endTime = performance.now();
   return (endTime - startTime) / BATCHING_LOOP;
+}
+
+function getAlignmentFromConfiguration(): vscode.StatusBarAlignment {
+  const shouldAlignRight = vscode.workspace.getConfiguration('remote-latency').get('alignRight');
+  if (shouldAlignRight) {
+    return vscode.StatusBarAlignment.Right;
+  }
+  return vscode.StatusBarAlignment.Left;
 }
 
 // This method is called when your extension is deactivated
