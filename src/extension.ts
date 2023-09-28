@@ -51,6 +51,7 @@ async function getLatency(remoteEnvName: string): Promise<number> {
     case 'wsl':
     case 'wsl-remote':
     case 'containers-remote':
+    case 'tunnel':
       return await getRemoteContainerLatency();
     default:
       return await getRemoteLatencyWithDefaultFS();
