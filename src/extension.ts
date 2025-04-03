@@ -10,6 +10,7 @@ const CONFIGURAION_KEY_ALIGNMENT = 'remote-latency.alignRight';
 
 let outputChannel: vscode.OutputChannel;
 let uriPrinted = false;
+let invalidUriWarningPrinted = false;
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -19,7 +20,7 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(outputChannel);
 
   const remoteEnvName = vscode.env.remoteName;
-  outputChannel.appendLine(`Remote env name: ${remoteEnvName}`);
+  outputChannel.appendLine(`[Remote Latency] Remote env name: ${remoteEnvName}`);
 
   if (!remoteEnvName) {
     // Not in remote
@@ -56,7 +57,7 @@ export function activate(context: vscode.ExtensionContext) {
   } satisfies vscode.Disposable);
 
   const updateStatusBarItem = async () => {
-    const latency = await getLatency(remoteEnvName);
+    const latency = await getLatency();
     statusBarItem.text = `Latency: ${latency.toFixed(2)}ms`;
     timeout = setTimeout(updateStatusBarItem, UPDATE_INTERVAL_MS);
   };
@@ -64,53 +65,41 @@ export function activate(context: vscode.ExtensionContext) {
   updateStatusBarItem();
 }
 
-async function getLatency(remoteEnvName: string): Promise<number> {
-  switch (remoteEnvName) {
-    case 'ssh-remote':
-    case 'wsl':
-    case 'wsl-remote':
-    case 'containers-remote':
-    case 'tunnel':
-    case 'codespaces':
-      return await getRemoteContainerLatency();
-    default:
-      return await getRemoteLatencyWithDefaultFS();
-  }
-}
-
-async function getRemoteContainerLatency(): Promise<number> {
+async function getLatency(): Promise<number> {
   if (vscode.workspace.workspaceFolders?.length) {
+    // If a workspace folder has been opened
     const workspaceFolderUri = vscode.workspace.workspaceFolders[0].uri;
     if (!uriPrinted) {
-      outputChannel.appendLine(`fs.stat uri: ${JSON.stringify(workspaceFolderUri.toJSON())}`);
+      outputChannel.appendLine(`[Remote Latency] testing for workspace uri: ${workspaceFolderUri.toString()}`);
       uriPrinted = true;
     }
-    const startTime = performance.now();
-    for (let i = 0; i < BATCHING_LOOP; i++) {
-      try {
-        await vscode.workspace.fs.stat(workspaceFolderUri);
-      } catch (e) {
-        // Ignore
+    return testLatency(workspaceFolderUri);
+  } else {
+    // In case we haven't opened a workspace folder yet
+    const fallbackUri = vscode.Uri
+      .file('/dev/null')
+      .with({
+        scheme: 'vscode-remote',
+        authority: vscode.env.remoteName,
+      });
+      if (!uriPrinted) {
+        outputChannel.appendLine(`[Remote Latency] testing for fallback uri: ${fallbackUri.toString()}`);
+        uriPrinted = true;
       }
-    }
-    const endTime = performance.now();
-    return (endTime - startTime) / BATCHING_LOOP;
+    return testLatency(fallbackUri);
   }
-  return 0;
 }
 
-async function getRemoteLatencyWithDefaultFS(): Promise<number> {
+async function testLatency(uri: vscode.Uri): Promise<number> {
   const startTime = performance.now();
-  const workspaceFolderUri = vscode.workspace.workspaceFolders?.[0]?.uri;
-  if (workspaceFolderUri && !uriPrinted) {
-    outputChannel.appendLine(`fs.stat uri: ${JSON.stringify(workspaceFolderUri.toJSON())}`);
-    uriPrinted = true;
-  }
   for (let i = 0; i < BATCHING_LOOP; i++) {
     try {
-      await vscode.workspace.fs.stat(vscode.Uri.parse('/dev/null'));
+      await vscode.workspace.fs.stat(uri);
     } catch (e) {
-      // Ignore
+      if (!invalidUriWarningPrinted) {
+        outputChannel.appendLine(`[Remote Latency][Warn] Invalid uri: ${uri.toString()}`);
+        invalidUriWarningPrinted = true;
+      }
     }
   }
   const endTime = performance.now();
