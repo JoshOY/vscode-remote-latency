@@ -20,6 +20,7 @@
   ],
   "browser": "./out/extension.web.js",
   "main": "./out/extension.js",
+  "icon": "assets/icon.png",
   "contributes": {
     "configuration": {
       "title": "Remote Latency Extension",
