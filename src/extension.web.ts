@@ -11,12 +11,10 @@ const CONFIGURAION_KEY_ALIGNMENT = 'remote-latency.alignRight';
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-  const outputChannel = vscode.window.createOutputChannel('remote-latency');
-  // Dispose output channel when deactivated
-  context.subscriptions.push(outputChannel);
-
   const remoteEnvName = vscode.env.remoteName;
-  outputChannel.appendLine(`Remote env name: ${remoteEnvName}`);
+
+  // In Web-worker
+  console.debug(`[Remote Latency] Remote env name: ${remoteEnvName}`);
 
   if (!remoteEnvName) {
     // Not in remote

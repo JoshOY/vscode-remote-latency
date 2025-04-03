@@ -35,7 +35,7 @@
   },
   "scripts": {
     "vscode:prepublish": "yarn run compile",
-    "compile": "NODE_ENV=production tsc -p ./",
+    "compile": "NODE_ENV=production tsc -p ./ && npm run compile-web",
     "compile-web": "NODE_ENV=production webpack -c ./webpack.config.js",
     "watch": "tsc -watch -p ./",
     "watch-web": "webpack -c./webpack.config.js --watch",
