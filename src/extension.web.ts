@@ -66,6 +66,7 @@ async function getLatency(remoteEnvName: string): Promise<number> {
     case 'wsl-remote':
     case 'containers-remote':
     case 'tunnel':
+    case 'codespaces':
       return await getRemoteContainerLatency();
     default:
       return await getRemoteLatencyWithDefaultFS();
@@ -75,6 +76,7 @@ async function getLatency(remoteEnvName: string): Promise<number> {
 async function getRemoteContainerLatency(): Promise<number> {
   if (vscode.workspace.workspaceFolders?.length) {
     const workspaceFolderUri = vscode.workspace.workspaceFolders[0].uri;
+    console.debug(`fs.stat uri: ${workspaceFolderUri.toJSON()}`);
     const startTime = performance.now();
     for (let i = 0; i < BATCHING_LOOP; i++) {
       try {
