@@ -8,6 +8,8 @@ const BATCHING_LOOP = 10;
 
 const CONFIGURAION_KEY_ALIGNMENT = 'remote-latency.alignRight';
 
+let uriPrinted = false;
+
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
@@ -76,7 +78,10 @@ async function getLatency(remoteEnvName: string): Promise<number> {
 async function getRemoteContainerLatency(): Promise<number> {
   if (vscode.workspace.workspaceFolders?.length) {
     const workspaceFolderUri = vscode.workspace.workspaceFolders[0].uri;
-    console.debug(`fs.stat uri: ${workspaceFolderUri.toJSON()}`);
+    if (!uriPrinted) {
+      uriPrinted = true;
+      console.debug(`fs.stat uri: ${JSON.stringify(workspaceFolderUri.toJSON())}`);
+    }
     const startTime = performance.now();
     for (let i = 0; i < BATCHING_LOOP; i++) {
       try {
@@ -92,6 +97,11 @@ async function getRemoteContainerLatency(): Promise<number> {
 }
 
 async function getRemoteLatencyWithDefaultFS(): Promise<number> {
+  const workspaceFolderUri = vscode.workspace.workspaceFolders?.[0]?.uri;
+  if (workspaceFolderUri && !uriPrinted) {
+    uriPrinted = true;
+    console.debug(`fs.stat uri: ${JSON.stringify(workspaceFolderUri.toJSON())}`);
+  }
   const startTime = performance.now();
   for (let i = 0; i < BATCHING_LOOP; i++) {
     try {
