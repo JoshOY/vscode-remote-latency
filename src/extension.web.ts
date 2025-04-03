@@ -8,19 +8,16 @@ const BATCHING_LOOP = 10;
 
 const CONFIGURAION_KEY_ALIGNMENT = 'remote-latency.alignRight';
 
-let outputChannel: vscode.OutputChannel;
 let uriPrinted = false;
 let invalidUriWarningPrinted = false;
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-  outputChannel = vscode.window.createOutputChannel('remote-latency');
-  // Dispose output channel when deactivated
-  context.subscriptions.push(outputChannel);
-
   const remoteEnvName = vscode.env.remoteName;
-  outputChannel.appendLine(`[Remote Latency] Remote env name: ${remoteEnvName}`);
+
+  // In Web-worker
+  console.debug(`[Remote Latency] Remote env name: ${remoteEnvName}`);
 
   if (!remoteEnvName) {
     // Not in remote
@@ -70,7 +67,7 @@ async function getLatency(): Promise<number> {
     // If a workspace folder has been opened
     const workspaceFolderUri = vscode.workspace.workspaceFolders[0].uri;
     if (!uriPrinted) {
-      outputChannel.appendLine(`[Remote Latency] testing for workspace uri: ${workspaceFolderUri.toString()}`);
+      console.debug(`[Remote Latency] testing for workspace uri: ${workspaceFolderUri.toString()}`);
       uriPrinted = true;
     }
     return testLatency(workspaceFolderUri);
@@ -83,7 +80,7 @@ async function getLatency(): Promise<number> {
         authority: vscode.env.remoteName,
       });
       if (!uriPrinted) {
-        outputChannel.appendLine(`[Remote Latency] testing for fallback uri: ${fallbackUri.toString()}`);
+        console.debug(`[Remote Latency] testing for fallback uri: ${fallbackUri.toString()}`);
         uriPrinted = true;
       }
     return testLatency(fallbackUri);
@@ -97,7 +94,7 @@ async function testLatency(uri: vscode.Uri): Promise<number> {
       await vscode.workspace.fs.stat(uri);
     } catch (e) {
       if (!invalidUriWarningPrinted) {
-        outputChannel.appendLine(`[Remote Latency][Warn] Invalid uri: ${uri.toString()}`);
+        console.debug(`[Remote Latency][Warn] Invalid uri: ${uri.toString()}`);
         invalidUriWarningPrinted = true;
       }
     }

@@ -12,6 +12,10 @@ VSCode version >= 1.74.0
 
 ## Release Notes
 
+### 0.3.0
+
+Support Web platform.
+
 ### 0.2.0
 
 Allow setting alignment direction (left/right) on the status bar.
