@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Icon Preview</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+        }
+        .icon-container {
+            /* 模拟应用图标的显示效果 */
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            border-radius: 22%; /* 配合图标的圆角 */
+        }
+    </style>
+</head>
+<body>
+
+<!-- SVG 图标代码 -->
+<svg width="256" height="256" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="icon-container">
+    <!-- 背景：深色圆角矩形 -->
+    <rect x="5" y="5" width="90" height="90" rx="28" fill="#181818" />
+    
+    <!-- 绿色主体框 -->
+    <!-- 使用路径绘制，模拟图片中略微厚实的矩形框 -->
+    <!-- 颜色取自图片中的鲜绿色 -->
+    <path d="M25 32 H75 V68 H25 Z" fill="none" stroke="#2EDA88" stroke-width="10" stroke-linejoin="round" />
+    
+    <!-- 中间的两个菱形 -->
+    <!-- 左边的菱形 -->
+    <rect x="36" y="46" width="8" height="8" transform="rotate(45 40 50)" fill="#2EDA88" />
+    <!-- 右边的菱形 -->
+    <rect x="56" y="46" width="8" height="8" transform="rotate(45 60 50)" fill="#2EDA88" />
+</svg>
+
+</body>
+</html>
